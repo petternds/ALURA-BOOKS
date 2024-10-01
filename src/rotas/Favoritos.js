@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components'
 import livroImg from '../imagens/livro.png'
+import { deleteFavorito, getFavoritos } from '../servicos/favoritos';
 
 
-const AppContainer = styled.div`
+const FavoritosContainer = styled.div `
    width: 100vw;
    height: 100vh;
    background-image: linear-gradient(90deg,#002F52 35%,#326589 165%);
@@ -45,25 +46,37 @@ const Titulo = styled.h2`
 `
 
 function Favoritos() {
- const [favoritos, setFavoritos] = useState([])
-  return (
-   <AppContainer>
-     <div>
-       <Titulo>Aqui estão seus livros favoritos:</Titulo>
-       <ResultadoContainer>
-         {
-           favoritos.length !== 0 ? favoritos.map(favorito => (
-             <Resultado>
-               <p>{favorito.nome}</p>
-               <img alt="livo fav" src={livroImg}/>
-             </Resultado>
-           )) : null
-         }
-       </ResultadoContainer>
-     </div>
-   </AppContainer>
- );
-}
+  const [favoritos, setFavoritos] = useState([]);
+  
+  const fetchFavoritos = async () => {
+    const livrosFavoritos = await getFavoritos()
+    setFavoritos(livrosFavoritos)
+  }
 
+  async function deletarFavorito(id) {
+    await deleteFavorito(id);
+    await fetchFavoritos();
+    alert(`livro de id: ${id} deletado`)
+  }
+
+  useEffect(() => {
+    fetchFavoritos()
+  }, []);
+
+ return (
+        <FavoritosContainer>
+            <Titulo>Aqui estão seus livros favoritos:</Titulo>
+            <ResultadoContainer>
+                { favoritos.length ?
+                    favoritos.map( favorito => (
+                        <Resultado onClick={() => deletarFavorito(favorito.id)}>
+                            <img alt='teste' src={livroImg}/>
+                            <p>{favorito.nome}</p>
+                        </Resultado> )) : null
+                }
+            </ResultadoContainer>
+        </FavoritosContainer>
+    );
+}
 
 export default Favoritos
